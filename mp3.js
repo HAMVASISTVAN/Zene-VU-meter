@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require('cors'); 
+const PORT = process.env.PORT || 3000;
 // cors() engedélyezi, hogy a 5500-as frontend hozzáférjen a 3000-es backend API-hoz.
 // A CORS azt engedi meg, hogy a 5500-as oldal kommunikálhasson a 3000-as Express szerverrel
 // app.use(express.json());  -> akkor kell, amikor a kliens JSON adatot küld a backendnek a body-ban
@@ -19,6 +20,6 @@ app.get("/zene2", function(req, res) {
 app.get("/zene3", function(req, res) {
     res.sendFile(__dirname + "/zene3.mp3");
 });
-app.listen(3000, function() {
-    console.log("MP3 szerver elindult a 3000-es porton.");
+app.listen(PORT, function() {
+    console.log("MP3 szerver elindult a " + PORT + "-es porton.");
 });
