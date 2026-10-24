@@ -6,6 +6,9 @@ const cors = require('cors');
 // A CORS pedig csak azért kell, mert most a Live Server 5500-as portjáról beszélgetünk az Express 3000-as portjával
 const app = express();
 app.use(cors());
+app.get("/", function(req, res) {
+    res.sendFile(__dirname + "/mp3_VU_meter.html");
+});
 
 app.get("/zene1", function(req, res) {
     res.sendFile(__dirname + "/zene1.mp3");
