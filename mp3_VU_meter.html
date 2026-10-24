@@ -3,19 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <title>Zenelejátszó</title>
+    
+<style>
+    .zenepanel {
+        width: 520px;
+        padding: 15px;
+        border: 1px solid #aaa;
+        border-radius: 10px;
+        background-color: #f2f2f2;
+    }
+
+    .zenesor {
+        padding: 8px;
+        margin-bottom: 8px;
+        background-color: white;
+        border-radius: 5px;
+    }
+
+    .zenesor button {
+        width: 120px;
+        padding: 6px;
+        cursor: pointer;
+    }
+    .zenesor.aktiv {
+    background-color: #cceeff;
+    border: 1px solid #3399cc;
+}
+</style>
+
 </head>
 <body>
     <h1>Az én zenelejátszóm</h1>
    <audio id="lejatszo" controls crossorigin="anonymous"></audio>
-    <br><br>
-    <button id="zene1">Zene 1</button>
-    <button id="zene2">Zene 2</button>
-    <button id="zene3">Zene 3</button>
+    <br><br>    
+<div class="zenepanel">
+
+    <div class="zenesor">
+        <button id="zene1">▶ Lejátszás</button>
+        <span>Falco – Der Kommissar (1982)</span>
+    </div>
+
+    <div class="zenesor">
+        <button id="zene2">▶ Lejátszás</button>
+        <span>Alphaville – Elevator (1983)</span>
+    </div>
+
+    <div class="zenesor">
+        <button id="zene3">▶ Lejátszás</button>
+        <span>16 BIT – Where Are You (1987)</span>
+    </div>
+
+</div>
     <br><br>
     <canvas id="vuMeter" width="500" height="100"></canvas>
     <script>
         let balHossz = 20;
         let jobbHossz = 20;  
+        let balCsucs = 0;  // Bal csatorna hangerőcsúcsa
+        let jobbCsucs = 0; // Jobb csatorna hangerőcsúcsa
         let irany = 1;
         let balIrany = 1;
         let jobbIrany = 1; 
@@ -54,24 +99,44 @@
         let zene3 = document.getElementById("zene3");
         let canvas = document.getElementById("vuMeter");
         let ctx = canvas.getContext("2d");
-        zene1.addEventListener("click", function() {
-            audioContext.resume();
-            lejatszo.src = "http://localhost:3000/zene1";
-            lejatszo.play();
 
-        });
-        zene2.addEventListener("click", function() {
-            audioContext.resume();
-            lejatszo.src = "http://localhost:3000/zene2";
-            lejatszo.play();
+        
+zene1.addEventListener("click", function() {
+    audioContext.resume();
+    // Az összes zenesor kijelölését töröljük
+    document.querySelectorAll(".zenesor").forEach(function(sor) {
+        sor.classList.remove("aktiv");
+    });
+    // A kiválasztott zenesor kiemelése
+    zene1.parentElement.classList.add("aktiv");
+    lejatszo.src = "http://localhost:3000/zene1";
+    lejatszo.play();
+});
 
-        });
-        zene3.addEventListener("click", function() {
-            audioContext.resume();
-            lejatszo.src = "http://localhost:3000/zene3";
-            lejatszo.play();
-        });
+       
+zene2.addEventListener("click", function() {
+    audioContext.resume();
+    // Az összes zenesor kijelölését töröljük
+    document.querySelectorAll(".zenesor").forEach(function(sor) {
+        sor.classList.remove("aktiv");
+    });
+    // A kiválasztott zenesor kiemelése
+    zene2.parentElement.classList.add("aktiv");
+    lejatszo.src = "http://localhost:3000/zene2";
+    lejatszo.play();
+});
 
+       zene3.addEventListener("click", function() {
+    audioContext.resume();
+    // Az összes zenesor kijelölését töröljük
+    document.querySelectorAll(".zenesor").forEach(function(sor) {
+        sor.classList.remove("aktiv");
+    });
+    // A kiválasztott zenesor kiemelése
+    zene3.parentElement.classList.add("aktiv");
+    lejatszo.src = "http://localhost:3000/zene3";
+    lejatszo.play();
+});
        // Betű beállítása
 ctx.font = "20px Arial";
 // L felirat
@@ -99,6 +164,9 @@ function frissit() {
 
 balHossz  = balOsszeg  / 128 * 2.0;
 jobbHossz = jobbOsszeg / 128 * 2.0;
+// A hangerőcsúcs frissítése
+balCsucs = Math.max(balHossz, balCsucs - 0.5);
+jobbCsucs = Math.max(jobbHossz, jobbCsucs - 0.5);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -106,8 +174,16 @@ jobbHossz = jobbOsszeg / 128 * 2.0;
     
 
     // Sávok kirajzolása
-    ctx.fillRect(20, 20, balHossz, 20);
-    ctx.fillRect(20, 60, jobbHossz, 20);
+   // Aktuális hangerő megjelenítése kék színnel
+   // Az aktuális hangerő kirajzolása kék színnel
+ctx.fillStyle = "blue";
+ctx.fillRect(20, 20, balHossz, 20);
+ctx.fillRect(20, 60, jobbHossz, 20);
+
+// A hangerőcsúcs jelölése piros vonallal
+ctx.fillStyle = "red";
+ctx.fillRect(20 + balCsucs, 20, 6, 20);
+ctx.fillRect(20 + jobbCsucs, 60, 6, 20);
 
     // Aktuális érték kiírása
 //ctx.fillText(Math.round(balHossz), 300, 37);
