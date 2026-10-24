@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Zenelejátszó</title>
+</head>
+<body>
+    <h1>Az én zenelejátszóm</h1>
+   <audio id="lejatszo" controls crossorigin="anonymous"></audio>
+    <br><br>
+    <button id="zene1">Zene 1</button>
+    <button id="zene2">Zene 2</button>
+    <button id="zene3">Zene 3</button>
+    <br><br>
+    <canvas id="vuMeter" width="500" height="100"></canvas>
+    <script>
+        let balHossz = 20;
+        let jobbHossz = 20;  
+        let irany = 1;
+        let balIrany = 1;
+        let jobbIrany = 1; 
+        let szamlalo = 0;
+        let lejatszo = document.getElementById("lejatszo"); // Ez az <audio> elemet jelenti        
+        let audioContext = new AudioContext();             // létrehoz egy Web Audio rendszert a böngészőben  
+        let forras = audioContext.createMediaElementSource(lejatszo);  // A lejátszó hangját szeretném betáplálni a Web Audio rendszerbe    
+        let analizalo = audioContext.createAnalyser();
+       
+        // balAnalizalo.fftSize  = 256;
+       // jobbAnalizalo.fftSize = 256;  // az analizáló a hangból számokat fog készíteni
+       // let adatok = new Uint8Array(analizalo.frequencyBinCount);
+         analizalo.fftSize = 256;
+         let splitter = audioContext.createChannelSplitter(2);
+        forras.connect(splitter);
+        forras.connect(analizalo);
+        analizalo.connect(audioContext.destination);  // hogy hangot is adjon
+
+       
+        
+        let balAnalizalo = audioContext.createAnalyser();
+        let jobbAnalizalo = audioContext.createAnalyser();
+        balAnalizalo.fftSize = 256;
+        jobbAnalizalo.fftSize = 256;   
+
+        let balAdatok = new Uint8Array(balAnalizalo.frequencyBinCount);
+        let jobbAdatok = new Uint8Array(jobbAnalizalo.frequencyBinCount);
+       
+
+       splitter.connect(balAnalizalo, 0);
+       splitter.connect(jobbAnalizalo, 1);
+        
+
+        let zene1 = document.getElementById("zene1");
+        let zene2 = document.getElementById("zene2");
+        let zene3 = document.getElementById("zene3");
+        let canvas = document.getElementById("vuMeter");
+        let ctx = canvas.getContext("2d");
+        zene1.addEventListener("click", function() {
+            audioContext.resume();
+            lejatszo.src = "http://localhost:3000/zene1";
+            lejatszo.play();
+
+        });
+        zene2.addEventListener("click", function() {
+            audioContext.resume();
+            lejatszo.src = "http://localhost:3000/zene2";
+            lejatszo.play();
+
+        });
+        zene3.addEventListener("click", function() {
+            audioContext.resume();
+            lejatszo.src = "http://localhost:3000/zene3";
+            lejatszo.play();
+        });
+
+       // Betű beállítása
+ctx.font = "20px Arial";
+// L felirat
+ctx.fillText("L", 2, 37);
+// L sáv
+ctx.fillRect(20, 20, balHossz, 20);
+// R felirat
+ctx.fillText("R", 2, 77);
+// R sáv
+ctx.fillRect(20, 60, jobbHossz, 20);
+function frissit() {
+   
+    balAnalizalo.getByteFrequencyData(balAdatok);
+    jobbAnalizalo.getByteFrequencyData(jobbAdatok);
+    let balOsszeg = 0;
+    let jobbOsszeg = 0;
+    // balHossz = balAdatok[0];
+    // jobbHossz = jobbAdatok[0];
+    // console.log(balAdatok);
+
+    for (let i = 0; i < 128; i++) {
+    balOsszeg = balOsszeg + balAdatok[i];
+    jobbOsszeg = jobbOsszeg + jobbAdatok[i];
+}
+
+balHossz  = balOsszeg  / 128 * 2.0;
+jobbHossz = jobbOsszeg / 128 * 2.0;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+   
+    
+
+    // Sávok kirajzolása
+    ctx.fillRect(20, 20, balHossz, 20);
+    ctx.fillRect(20, 60, jobbHossz, 20);
+
+    // Aktuális érték kiírása
+//ctx.fillText(Math.round(balHossz), 300, 37);
+//ctx.fillText(Math.round(jobbHossz), 300, 77);
+
+    requestAnimationFrame(frissit);}
+
+frissit();
+    </script>
+</body>
+</html>
